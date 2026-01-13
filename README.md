@@ -166,6 +166,29 @@ The stack includes:
 - **screeps-graphite**: Time-series database
 - **screeps-grafana**: Dashboard UI (with Traefik integration)
 
+## Dashboard Setup
+
+After starting the stack, configure Grafana to display your Screeps metrics:
+
+### 1. Add Graphite Data Source
+
+1. Open Grafana at `http://localhost:3000` (default login: admin/admin)
+2. Go to **Connections** → **Data sources** → **Add data source**
+3. Select **Graphite**
+4. Configure:
+   - **Name**: `Graphite` (or any name you prefer)
+   - **URL**: `http://screeps-graphite:80`
+5. Click **Save & test** to verify the connection
+
+### 2. Import the Dashboard
+
+1. Go to **Dashboards** → **New** → **Import**
+2. Upload the JSON file from `dashboards/general-overview.json` in this repository
+3. Select your Graphite data source when prompted
+4. Click **Import**
+
+The dashboard will start showing data once metrics have been collected (may take a few minutes after initial setup).
+
 ## Memory.stats Format
 
 The collector reads from `Memory.stats` (or a segment) in your Screeps code. Any nested object structure will be flattened:

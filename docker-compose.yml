@@ -4,7 +4,6 @@
 # Deploy this stack via Portainer or docker-compose
 #
 # Provides: Grafana dashboard for Screeps game statistics
-# Protected by: Authelia 2FA (no IP whitelist)
 #
 # Required: Set environment variables in Portainer stack deployment
 # - SCREEPS_TOKEN (get from https://screeps.com/a/#!/account/auth-tokens)
@@ -40,7 +39,7 @@ services:
     depends_on:
       - screeps-graphite
     command: >
-      sh -c "wget -O /app/stats-collector.js https://raw.githubusercontent.com/crazydisi/screeps-data-collector/main/stats-collector.js && node /app/stats-collector.js"
+      sh -c "apk add --no-cache wget && wget -q -O /app/stats-collector.js https://raw.githubusercontent.com/crazydisi/screeps-data-collector/main/stats-collector.js && node /app/stats-collector.js"
 
   # ---------------------------------------------------------------------------
   # Graphite - Time-series database with built-in StatsD
