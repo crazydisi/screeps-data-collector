@@ -1,0 +1,98 @@
+# =============================================================================
+# Screeps Grafana Monitoring Stack
+# =============================================================================
+# Deploy this stack via Portainer or docker-compose
+#
+# Provides: Grafana dashboard for Screeps game statistics
+# Protected by: Authelia 2FA (no IP whitelist)
+#
+# Required: Set environment variables in Portainer stack deployment
+# - SCREEPS_TOKEN (get from https://screeps.com/a/#!/account/auth-tokens)
+# =============================================================================
+
+services:
+  # ---------------------------------------------------------------------------
+  # screeps-stats - Fetches game data from Screeps API and pushes to Graphite
+  # ---------------------------------------------------------------------------
+  screeps-stats:
+    image: node:18-alpine
+    container_name: screeps-stats
+    restart: unless-stopped
+    environment:
+      # Required
+      - SCREEPS_TOKEN=${SCREEPS_TOKEN}
+      # Shards: comma-separated list or 'all' for auto-discovery
+      - SCREEPS_SHARDS=${SCREEPS_SHARDS:-shard3}
+      # Stats source: 'memory' or 'segment'
+      - STATS_SOURCE=${STATS_SOURCE:-memory}
+      - STATS_PATH=${STATS_PATH:-stats}
+      - STATS_SEGMENT=${STATS_SEGMENT:-30}
+      # Graphite connection
+      - GRAPHITE_HOST=screeps-graphite
+      - GRAPHITE_PORT=2003
+      # Collector settings
+      - POLL_INTERVAL=${POLL_INTERVAL:-60000}
+      - METRICS_PREFIX=${METRICS_PREFIX:-screeps}
+      - INCLUDE_SHARD_IN_PATH=${INCLUDE_SHARD_IN_PATH:-false}
+    working_dir: /app
+    networks:
+      - screeps-net
+    depends_on:
+      - screeps-graphite
+    command: >
+      sh -c "wget -O /app/stats-collector.js https://raw.githubusercontent.com/crazydisi/screeps-data-collector/main/stats-collector.js && node /app/stats-collector.js"
+
+  # ---------------------------------------------------------------------------
+  # Graphite - Time-series database with built-in StatsD
+  # ---------------------------------------------------------------------------
+  screeps-graphite:
+    image: graphiteapp/graphite-statsd:latest
+    container_name: screeps-graphite
+    restart: unless-stopped
+    volumes:
+      - screeps_graphite_data:/opt/graphite/storage
+      - screeps_graphite_conf:/opt/graphite/conf
+    networks:
+      - screeps-net
+
+  # ---------------------------------------------------------------------------
+  # Grafana - Dashboard UI (exposed via Traefik or directly on port 3000)
+  # ---------------------------------------------------------------------------
+  screeps-grafana:
+    image: grafana/grafana:latest
+    container_name: screeps-grafana
+    restart: unless-stopped
+    environment:
+      - GF_SERVER_ROOT_URL=${GRAFANA_URL:-http://localhost:3000}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+      - GF_AUTH_DISABLE_LOGIN_FORM=false
+      - GF_AUTH_ANONYMOUS_ENABLED=false
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-piechart-panel
+    volumes:
+      - screeps_grafana_data:/var/lib/grafana
+    ports:
+      - "${GRAFANA_PORT:-3000}:3000"
+    networks:
+      - screeps-net
+      - traefik-net
+    depends_on:
+      - screeps-graphite
+    labels:
+      - "traefik.enable=${TRAEFIK_ENABLE:-false}"
+      - "traefik.http.routers.screeps-grafana.rule=Host(`${GRAFANA_HOST:-localhost}`)"
+      - "traefik.http.routers.screeps-grafana.entrypoints=${TRAEFIK_ENTRYPOINT:-websecure}"
+      - "traefik.http.routers.screeps-grafana.tls=${TRAEFIK_TLS:-true}"
+      - "traefik.http.routers.screeps-grafana.tls.certresolver=${TRAEFIK_CERTRESOLVER:-letsencrypt}"
+      - "traefik.http.routers.screeps-grafana.middlewares=${TRAEFIK_MIDDLEWARES:-}"
+      - "traefik.http.services.screeps-grafana.loadbalancer.server.port=3000"
+
+volumes:
+  screeps_graphite_data:
+  screeps_graphite_conf:
+  screeps_grafana_data:
+
+networks:
+  screeps-net:
+    driver: bridge
+  traefik-net:
+    external: true
