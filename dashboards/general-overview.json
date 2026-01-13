@@ -30,7 +30,7 @@
           "max": 10000
         }
       },
-      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 1 },
+      "gridPos": { "h": 4, "w": 3, "x": 0, "y": 1 },
       "id": 1,
       "options": {
         "orientation": "auto",
@@ -43,7 +43,42 @@
       "targets": [
         {
           "refId": "A",
-          "target": "screeps.*.cpu.bucket"
+          "target": "screeps.$shard.cpu.bucket"
+        }
+      ]
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 70 },
+              { "color": "red", "value": 90 }
+            ]
+          },
+          "unit": "percent",
+          "max": 100,
+          "min": 0
+        }
+      },
+      "gridPos": { "h": 4, "w": 3, "x": 3, "y": 1 },
+      "id": 7,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "title": "CPU %",
+      "type": "gauge",
+      "targets": [
+        {
+          "refId": "A",
+          "target": "screeps.$shard.cpu.percent"
         }
       ]
     },
@@ -63,7 +98,7 @@
           "unit": "none"
         }
       },
-      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 1 },
+      "gridPos": { "h": 4, "w": 3, "x": 6, "y": 1 },
       "id": 2,
       "options": {
         "colorMode": "value",
@@ -78,7 +113,7 @@
       "targets": [
         {
           "refId": "A",
-          "target": "screeps.*.cpu.used"
+          "target": "screeps.$shard.cpu.used"
         }
       ]
     },
@@ -91,7 +126,7 @@
           "unit": "none"
         }
       },
-      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 1 },
+      "gridPos": { "h": 4, "w": 3, "x": 9, "y": 1 },
       "id": 3,
       "options": {
         "colorMode": "value",
@@ -106,7 +141,7 @@
       "targets": [
         {
           "refId": "A",
-          "target": "screeps.*.creeps.total"
+          "target": "screeps.$shard.creeps.total"
         }
       ]
     },
@@ -119,7 +154,7 @@
           "unit": "none"
         }
       },
-      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 1 },
+      "gridPos": { "h": 4, "w": 3, "x": 12, "y": 1 },
       "id": 4,
       "options": {
         "colorMode": "value",
@@ -134,7 +169,7 @@
       "targets": [
         {
           "refId": "A",
-          "target": "screeps.*.gcl.level"
+          "target": "screeps.$shard.gcl.level"
         }
       ]
     },
@@ -147,7 +182,7 @@
           "unit": "currencyUSD"
         }
       },
-      "gridPos": { "h": 4, "w": 4, "x": 16, "y": 1 },
+      "gridPos": { "h": 4, "w": 3, "x": 15, "y": 1 },
       "id": 5,
       "options": {
         "colorMode": "value",
@@ -162,7 +197,7 @@
       "targets": [
         {
           "refId": "A",
-          "target": "screeps.*.market.credits"
+          "target": "screeps.$shard.market.credits"
         }
       ]
     },
@@ -175,7 +210,35 @@
           "unit": "none"
         }
       },
-      "gridPos": { "h": 4, "w": 4, "x": 20, "y": 1 },
+      "gridPos": { "h": 4, "w": 3, "x": 18, "y": 1 },
+      "id": 8,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "title": "Market Orders",
+      "type": "stat",
+      "targets": [
+        {
+          "refId": "A",
+          "target": "screeps.$shard.market.orders"
+        }
+      ]
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
+          "unit": "none"
+        }
+      },
+      "gridPos": { "h": 4, "w": 3, "x": 21, "y": 1 },
       "id": 6,
       "options": {
         "colorMode": "value",
@@ -190,7 +253,7 @@
       "targets": [
         {
           "refId": "A",
-          "target": "screeps.*.tick"
+          "target": "screeps.$shard.tick"
         }
       ]
     },
@@ -246,11 +309,11 @@
       "targets": [
         {
           "refId": "A",
-          "target": "alias(screeps.*.cpu.used, 'CPU Used')"
+          "target": "alias(screeps.$shard.cpu.used, 'CPU Used')"
         },
         {
           "refId": "B",
-          "target": "alias(screeps.*.cpu.limit, 'CPU Limit')"
+          "target": "alias(screeps.$shard.cpu.limit, 'CPU Limit')"
         }
       ]
     },
@@ -302,7 +365,7 @@
       "targets": [
         {
           "refId": "A",
-          "target": "alias(screeps.*.cpu.bucket, 'Bucket')"
+          "target": "alias(screeps.$shard.cpu.bucket, 'Bucket')"
         }
       ]
     },
@@ -311,6 +374,44 @@
       "id": 102,
       "title": "Room Stats",
       "type": "row"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 50 },
+              { "color": "green", "value": 80 }
+            ]
+          },
+          "unit": "percent",
+          "max": 100,
+          "min": 0
+        }
+      },
+      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 15 },
+      "id": 22,
+      "options": {
+        "displayMode": "gradient",
+        "minVizHeight": 10,
+        "minVizWidth": 0,
+        "orientation": "horizontal",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "showUnfilled": true,
+        "valueMode": "color"
+      },
+      "title": "Spawn Energy Fill %",
+      "type": "bargauge",
+      "targets": [
+        {
+          "refId": "A",
+          "target": "aliasByNode(screeps.$shard.rooms.$room.energyPercent, 3)"
+        }
+      ]
     },
     {
       "fieldConfig": {
@@ -340,7 +441,7 @@
           "unit": "percent"
         }
       },
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 15 },
+      "gridPos": { "h": 6, "w": 8, "x": 8, "y": 15 },
       "id": 20,
       "options": {
         "legend": { "calcs": ["lastNotNull"], "displayMode": "table", "placement": "bottom", "showLegend": true },
@@ -351,7 +452,7 @@
       "targets": [
         {
           "refId": "A",
-          "target": "aliasByNode(screeps.*.rooms.*.rclPercent, 3)"
+          "target": "aliasByNode(screeps.$shard.rooms.$room.rclPercent, 3)"
         }
       ]
     },
@@ -383,7 +484,7 @@
           "unit": "none"
         }
       },
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 15 },
+      "gridPos": { "h": 6, "w": 8, "x": 16, "y": 15 },
       "id": 21,
       "options": {
         "legend": { "calcs": ["lastNotNull"], "displayMode": "table", "placement": "bottom", "showLegend": true },
@@ -394,12 +495,12 @@
       "targets": [
         {
           "refId": "A",
-          "target": "aliasByNode(screeps.*.rooms.*.energy, 3)"
+          "target": "aliasByNode(screeps.$shard.rooms.$room.energy, 3)"
         }
       ]
     },
     {
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 23 },
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 21 },
       "id": 103,
       "title": "Creep Population",
       "type": "row"
@@ -432,7 +533,7 @@
           "unit": "none"
         }
       },
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 24 },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 22 },
       "id": 30,
       "options": {
         "legend": { "calcs": ["lastNotNull"], "displayMode": "table", "placement": "right", "showLegend": true },
@@ -443,7 +544,7 @@
       "targets": [
         {
           "refId": "A",
-          "target": "aliasByNode(screeps.*.creeps.byRole.*, 4)"
+          "target": "aliasByNode(screeps.$shard.creeps.byRole.*, 4)"
         }
       ]
     },
@@ -475,7 +576,7 @@
           "unit": "none"
         }
       },
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 22 },
       "id": 31,
       "options": {
         "legend": { "calcs": ["lastNotNull"], "displayMode": "table", "placement": "bottom", "showLegend": true },
@@ -486,12 +587,64 @@
       "targets": [
         {
           "refId": "A",
-          "target": "alias(screeps.*.creeps.total, 'Total Creeps')"
+          "target": "alias(screeps.$shard.creeps.total, 'Total Creeps')"
         }
       ]
     },
     {
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 32 },
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 30 },
+      "id": 106,
+      "title": "Per-Room Creeps",
+      "type": "row",
+      "collapsed": true,
+      "panels": [
+        {
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "palette-classic" },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 30,
+                "gradientMode": "none",
+                "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+                "lineInterpolation": "stepAfter",
+                "lineWidth": 2,
+                "pointSize": 5,
+                "scaleDistribution": { "type": "linear" },
+                "showPoints": "never",
+                "spanNulls": true,
+                "stacking": { "group": "A", "mode": "normal" },
+                "thresholdsStyle": { "mode": "off" }
+              },
+              "mappings": [],
+              "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
+              "unit": "none"
+            }
+          },
+          "gridPos": { "h": 8, "w": 24, "x": 0, "y": 31 },
+          "id": 32,
+          "options": {
+            "legend": { "calcs": ["lastNotNull"], "displayMode": "table", "placement": "right", "showLegend": true },
+            "tooltip": { "mode": "multi", "sort": "desc" }
+          },
+          "title": "Creeps by Room & Role",
+          "type": "timeseries",
+          "targets": [
+            {
+              "refId": "A",
+              "target": "aliasByNode(screeps.$shard.rooms.$room.creeps.*, 3, 5)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 31 },
       "id": 104,
       "title": "Storage & Economy",
       "type": "row",
@@ -525,7 +678,7 @@
               "unit": "none"
             }
           },
-          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 33 },
+          "gridPos": { "h": 8, "w": 8, "x": 0, "y": 32 },
           "id": 40,
           "options": {
             "legend": { "calcs": ["lastNotNull", "mean"], "displayMode": "table", "placement": "bottom", "showLegend": true },
@@ -536,7 +689,50 @@
           "targets": [
             {
               "refId": "A",
-              "target": "aliasByNode(screeps.*.rooms.*.storage.energy, 3)"
+              "target": "aliasByNode(screeps.$shard.rooms.$room.storage.energy, 3)"
+            }
+          ]
+        },
+        {
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "palette-classic" },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 20,
+                "gradientMode": "opacity",
+                "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+                "lineInterpolation": "smooth",
+                "lineWidth": 2,
+                "pointSize": 5,
+                "scaleDistribution": { "type": "linear" },
+                "showPoints": "never",
+                "spanNulls": true,
+                "stacking": { "group": "A", "mode": "none" },
+                "thresholdsStyle": { "mode": "off" }
+              },
+              "mappings": [],
+              "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
+              "unit": "none"
+            }
+          },
+          "gridPos": { "h": 8, "w": 8, "x": 8, "y": 32 },
+          "id": 42,
+          "options": {
+            "legend": { "calcs": ["lastNotNull", "mean"], "displayMode": "table", "placement": "bottom", "showLegend": true },
+            "tooltip": { "mode": "multi", "sort": "none" }
+          },
+          "title": "Terminal Energy",
+          "type": "timeseries",
+          "targets": [
+            {
+              "refId": "A",
+              "target": "aliasByNode(screeps.$shard.rooms.$room.terminal.energy, 3)"
             }
           ]
         },
@@ -568,7 +764,7 @@
               "unit": "currencyUSD"
             }
           },
-          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 33 },
+          "gridPos": { "h": 8, "w": 8, "x": 16, "y": 32 },
           "id": 41,
           "options": {
             "legend": { "calcs": ["lastNotNull"], "displayMode": "table", "placement": "bottom", "showLegend": true },
@@ -579,14 +775,100 @@
           "targets": [
             {
               "refId": "A",
-              "target": "alias(screeps.market.credits, 'Credits')"
+              "target": "alias(screeps.$shard.market.credits, 'Credits')"
+            }
+          ]
+        },
+        {
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "palette-classic" },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+                "lineInterpolation": "smooth",
+                "lineWidth": 2,
+                "pointSize": 5,
+                "scaleDistribution": { "type": "linear" },
+                "showPoints": "never",
+                "spanNulls": true,
+                "stacking": { "group": "A", "mode": "none" },
+                "thresholdsStyle": { "mode": "off" }
+              },
+              "mappings": [],
+              "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
+              "unit": "none"
+            }
+          },
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 40 },
+          "id": 43,
+          "options": {
+            "legend": { "calcs": ["lastNotNull"], "displayMode": "table", "placement": "bottom", "showLegend": true },
+            "tooltip": { "mode": "multi", "sort": "none" }
+          },
+          "title": "Storage Total Used",
+          "type": "timeseries",
+          "targets": [
+            {
+              "refId": "A",
+              "target": "aliasByNode(screeps.$shard.rooms.$room.storage.total, 3)"
+            }
+          ]
+        },
+        {
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "palette-classic" },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+                "lineInterpolation": "smooth",
+                "lineWidth": 2,
+                "pointSize": 5,
+                "scaleDistribution": { "type": "linear" },
+                "showPoints": "never",
+                "spanNulls": true,
+                "stacking": { "group": "A", "mode": "none" },
+                "thresholdsStyle": { "mode": "off" }
+              },
+              "mappings": [],
+              "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
+              "unit": "none"
+            }
+          },
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 40 },
+          "id": 44,
+          "options": {
+            "legend": { "calcs": ["lastNotNull"], "displayMode": "table", "placement": "bottom", "showLegend": true },
+            "tooltip": { "mode": "multi", "sort": "none" }
+          },
+          "title": "Terminal Total Used",
+          "type": "timeseries",
+          "targets": [
+            {
+              "refId": "A",
+              "target": "aliasByNode(screeps.$shard.rooms.$room.terminal.total, 3)"
             }
           ]
         }
       ]
     },
     {
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 33 },
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 32 },
       "id": 105,
       "title": "GCL Progress",
       "type": "row",
@@ -620,7 +902,7 @@
               "unit": "percent"
             }
           },
-          "gridPos": { "h": 8, "w": 24, "x": 0, "y": 34 },
+          "gridPos": { "h": 8, "w": 24, "x": 0, "y": 33 },
           "id": 50,
           "options": {
             "legend": { "calcs": ["lastNotNull"], "displayMode": "table", "placement": "bottom", "showLegend": true },
@@ -631,7 +913,7 @@
           "targets": [
             {
               "refId": "A",
-              "target": "alias(screeps.*.gcl.percent, 'GCL %')"
+              "target": "alias(screeps.$shard.gcl.percent, 'GCL %')"
             }
           ]
         }
@@ -642,7 +924,56 @@
   "schemaVersion": 38,
   "tags": ["screeps", "gaming"],
   "templating": {
-    "list": []
+    "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": "*",
+          "value": "*"
+        },
+        "datasource": {
+          "type": "graphite"
+        },
+        "definition": "screeps.*",
+        "hide": 0,
+        "includeAll": true,
+        "allValue": "*",
+        "label": "Shard",
+        "multi": false,
+        "name": "shard",
+        "options": [],
+        "query": "screeps.*",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "*",
+          "value": "*"
+        },
+        "datasource": {
+          "type": "graphite"
+        },
+        "definition": "screeps.$shard.rooms.*",
+        "hide": 0,
+        "includeAll": true,
+        "allValue": "*",
+        "label": "Room",
+        "multi": true,
+        "name": "room",
+        "options": [],
+        "query": "screeps.$shard.rooms.*",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      }
+    ]
   },
   "time": {
     "from": "now-6h",
@@ -652,7 +983,7 @@
     "refresh_intervals": ["5s", "10s", "30s", "1m", "5m", "15m", "30m", "1h"]
   },
   "timezone": "browser",
-  "title": "General Overview",
+  "title": "Screeps Overview",
   "uid": "screeps-general-overview",
   "version": 1,
   "weekStart": ""
