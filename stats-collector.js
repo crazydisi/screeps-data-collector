@@ -25,7 +25,7 @@ const config = {
   graphitePort: parseInt(process.env.GRAPHITE_PORT) || 2003,
 
   // Collector settings
-  pollInterval: parseInt(process.env.POLL_INTERVAL) || 60000,
+  minPollInterval: parseInt(process.env.MIN_POLL_INTERVAL) || 60000,
   prefix: process.env.METRICS_PREFIX || 'screeps',
   includeShard: process.env.INCLUDE_SHARD_IN_PATH !== 'false',
 
@@ -42,9 +42,85 @@ let consecutiveErrors = 0;
 let lastShardCheck = 0;
 const SHARD_CHECK_INTERVAL = 5 * 60 * 1000; // Re-check inactive shards every 5 minutes
 
+// Rate limit tracking (per-endpoint)
+const rateLimitInfo = {
+  limit: 1440,        // Default daily limit for /api/user/memory
+  remaining: 1440,
+  reset: 0,           // UTC epoch seconds when limit resets
+  lastUpdated: 0
+};
+
+// Dynamic poll interval
+let dynamicPollInterval = config.minPollInterval;
+
 // =============================================================================
 // API Functions
 // =============================================================================
+
+/**
+ * Update rate limit info from response headers
+ */
+function updateRateLimitInfo(headers) {
+  const limit = parseInt(headers['x-ratelimit-limit']);
+  const remaining = parseInt(headers['x-ratelimit-remaining']);
+  const reset = parseInt(headers['x-ratelimit-reset']);
+
+  if (!isNaN(limit)) rateLimitInfo.limit = limit;
+  if (!isNaN(remaining)) rateLimitInfo.remaining = remaining;
+  if (!isNaN(reset)) rateLimitInfo.reset = reset;
+  rateLimitInfo.lastUpdated = Date.now();
+
+  // Recalculate optimal poll interval
+  recalculatePollInterval();
+}
+
+/**
+ * Calculate optimal poll interval based on remaining quota and active shards
+ */
+function recalculatePollInterval() {
+  const now = Math.floor(Date.now() / 1000);
+  const secondsUntilReset = Math.max(0, rateLimitInfo.reset - now);
+  const activeShardCount = Math.max(1, activeShards.size);
+
+  if (rateLimitInfo.remaining <= 0) {
+    // No requests left, wait until reset
+    dynamicPollInterval = (secondsUntilReset + 60) * 1000;
+    console.log(`[Rate Limit] No requests remaining, waiting ${Math.ceil(dynamicPollInterval / 1000)}s until reset`);
+    return;
+  }
+
+  if (secondsUntilReset <= 0) {
+    // Reset time passed, use default interval
+    dynamicPollInterval = config.minPollInterval;
+    return;
+  }
+
+  // Calculate: how often can we poll given remaining requests and time until reset?
+  // Leave 10% buffer for safety
+  const safeRemaining = Math.floor(rateLimitInfo.remaining * 0.9);
+  const requestsPerPoll = activeShardCount; // One request per active shard
+  const pollsWeCanMake = Math.floor(safeRemaining / requestsPerPoll);
+
+  if (pollsWeCanMake <= 0) {
+    // Not enough requests left, wait until reset
+    dynamicPollInterval = (secondsUntilReset + 60) * 1000;
+    console.log(`[Rate Limit] Low quota (${rateLimitInfo.remaining}), waiting ${Math.ceil(dynamicPollInterval / 1000)}s`);
+    return;
+  }
+
+  // Spread polls evenly across remaining time
+  const calculatedInterval = Math.ceil((secondsUntilReset * 1000) / pollsWeCanMake);
+
+  // Clamp between minimum (30s) and maximum (5 min)
+  const minInterval = 30000;
+  const maxInterval = 300000;
+  dynamicPollInterval = Math.max(minInterval, Math.min(maxInterval, calculatedInterval));
+
+  // Don't go below configured interval
+  dynamicPollInterval = Math.max(dynamicPollInterval, config.minPollInterval);
+
+  console.log(`[Rate Limit] ${rateLimitInfo.remaining}/${rateLimitInfo.limit} remaining, reset in ${secondsUntilReset}s, interval: ${Math.ceil(dynamicPollInterval / 1000)}s`);
+}
 
 /**
  * Make an HTTPS request to the Screeps API
@@ -68,6 +144,9 @@ function apiRequest(path, retries = 0) {
       let data = '';
       res.on('data', chunk => data += chunk);
       res.on('end', () => {
+        // Update rate limit info from headers
+        updateRateLimitInfo(res.headers);
+
         // Check for rate limiting
         if (res.statusCode === 429) {
           const retryAfter = parseInt(res.headers['retry-after']) || 60;
@@ -325,6 +404,7 @@ async function collectStats() {
 
 /**
  * Main collection loop with error handling
+ * Schedules next run based on dynamic poll interval
  */
 async function runCollector() {
   try {
@@ -332,6 +412,11 @@ async function runCollector() {
   } catch (e) {
     console.error('Collection error:', e.message);
   }
+
+  // Schedule next collection with dynamic interval
+  const nextInterval = dynamicPollInterval;
+  setTimeout(runCollector, nextInterval);
+  console.log(`[${new Date().toISOString()}] Next collection in ${Math.ceil(nextInterval / 1000)}s`);
 }
 
 // =============================================================================
@@ -345,8 +430,9 @@ async function main() {
   console.log(`Host:          ${config.host}`);
   console.log(`Shards:        ${config.autoDiscoverShards ? 'auto-discover' : config.shards.join(', ')}`);
   console.log(`Auto-scaling:  enabled (checks inactive shards every 5 min)`);
+  console.log(`Rate limiting: dynamic (adjusts based on API quota)`);
   console.log(`Stats source:  ${config.statsSource}${config.statsSource === 'segment' ? ` (segment ${config.statsSegment})` : ` (${config.statsPath})`}`);
-  console.log(`Poll interval: ${config.pollInterval}ms`);
+  console.log(`Min interval:  ${config.minPollInterval}ms`);
   console.log(`Graphite:      ${config.graphiteHost}:${config.graphitePort}`);
   console.log(`Prefix:        ${config.prefix}`);
   console.log(`Include shard: ${config.includeShard}`);
@@ -363,13 +449,8 @@ async function main() {
     await discoverShards();
   }
 
-  // Initial collection
+  // Start collection loop (self-scheduling with dynamic interval)
   await runCollector();
-
-  // Schedule recurring collection
-  setInterval(runCollector, config.pollInterval);
-
-  console.log(`Collector running, next update in ${config.pollInterval / 1000}s...`);
 }
 
 // Handle graceful shutdown

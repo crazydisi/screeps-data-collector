@@ -30,7 +30,7 @@ services:
       - GRAPHITE_HOST=screeps-graphite
       - GRAPHITE_PORT=2003
       # Collector settings
-      - POLL_INTERVAL=${POLL_INTERVAL:-60000}
+      - MIN_POLL_INTERVAL=${MIN_POLL_INTERVAL:-60000}
       - METRICS_PREFIX=${METRICS_PREFIX:-screeps}
       - INCLUDE_SHARD_IN_PATH=${INCLUDE_SHARD_IN_PATH:-false}
     working_dir: /app
